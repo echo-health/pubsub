@@ -3,6 +3,7 @@ package google
 import (
 	"context"
 	fmt "fmt"
+	"google.golang.org/grpc"
 	math "math"
 	"os"
 	"runtime"
@@ -55,6 +56,7 @@ func NewGoogleCloud(projectID string) (*GoogleCloud, error) {
 
 	if os.Getenv("PUBSUB_EMULATOR_HOST") != "" {
 		oo = append(oo, option.WithoutAuthentication())
+		oo = append(oo, option.WithGRPCDialOption(grpc.WithInsecure()))
 	}
 
 	c, err := pubsub.NewClient(context.Background(), projectID, oo...)
