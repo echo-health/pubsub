@@ -4,6 +4,7 @@ import (
 	"context"
 	fmt "fmt"
 	math "math"
+	"os"
 	"runtime"
 	"sync"
 	"time"
@@ -48,12 +49,20 @@ func NewGoogleCloud(projectID string) (*GoogleCloud, error) {
 		numConns = 4
 	}
 
-	c, err := pubsub.NewClient(context.Background(), projectID, option.WithGRPCConnectionPool(numConns))
+	oo := []option.ClientOption{
+		option.WithGRPCConnectionPool(numConns),
+	}
+
+	if os.Getenv("PUBSUB_EMULATOR_HOST") != "" {
+		oo = append(oo, option.WithoutAuthentication())
+	}
+
+	c, err := pubsub.NewClient(context.Background(), projectID, oo...)
 	if err != nil {
 		return nil, err
 	}
 
-	s, err := pbs.NewSubscriberClient(context.Background(), option.WithGRPCConnectionPool(numConns))
+	s, err := pbs.NewSubscriberClient(context.Background(), oo...)
 	if err != nil {
 		return nil, err
 	}
